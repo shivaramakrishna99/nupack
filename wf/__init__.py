@@ -7,6 +7,8 @@ from pathlib import Path
 
 from latch import small_task, workflow
 from latch.types import LatchFile
+from flytekit.core.with_metadata import FlyteMetadata
+
 
 
 @small_task
