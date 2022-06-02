@@ -1,5 +1,5 @@
 """
-Assemble and sort some COVID reads...
+Predict the folded structure of an RNA sequence
 """
 
 import subprocess
@@ -10,7 +10,7 @@ from latch.types import LatchFile
 from flytekit.core.with_metadata import FlyteMetadata
 
 @small_task
-def RNAfold_task(
+def nupack_task(
     input_seq: str,
     output_name: str
 ) -> LatchFile:
@@ -22,18 +22,18 @@ def RNAfold_task(
     return LatchFile(str(out), f"latch://{out}")
 
 @workflow
-def RNAfold(
+def nupack(
     input_seq: str,
     output_name: str,
 ) -> LatchFile:
     """Description...
 
-    # RNAfold
+    # NUPACK
     
     ---
     ## About
 
-    <What does RNAfold do?> 
+    <What does NUPACK do?> 
 
     __metadata__:
         display_name: Predict the folded structure of an RNA sequence
@@ -53,7 +53,7 @@ def RNAfold(
           __metadata__:
             display_name: Input RNA sequence
     """
-    return RNAfold_task(
+    return nupack_task(
         input_seq=input_seq,
         output_name=output_name
     )
