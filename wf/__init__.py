@@ -8,7 +8,6 @@ from pathlib import Path
 from latch import small_task, workflow
 from latch.types import LatchFile
 from flytekit.core.with_metadata import FlyteMetadata
-from nupack import *
 
 @small_task
 def RNAfold_task(
