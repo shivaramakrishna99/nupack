@@ -7,73 +7,38 @@ from pathlib import Path
 
 from latch import small_task, workflow
 from latch.types import LatchFile
-
-
-@small_task
-def assembly_task(read1: LatchFile, read2: LatchFile) -> LatchFile:
-
-    # A reference to our output.
-    sam_file = Path("covid_assembly.sam").resolve()
-
-    _bowtie2_cmd = [
-        "bowtie2/bowtie2",
-        "--local",
-        "-x",
-        "wuhan",
-        "-1",
-        read1.local_path,
-        "-2",
-        read2.local_path,
-        "--very-sensitive-local",
-        "-S",
-        str(sam_file),
-    ]
-
-    subprocess.run(_bowtie2_cmd)
-
-    return LatchFile(str(sam_file), "latch:///covid_assembly.sam")
-
+from flytekit.core.with_metadata import FlyteMetadata
+from nupack import *
 
 @small_task
-def sort_bam_task(sam: LatchFile) -> LatchFile:
+def RNAfold_task(
+    input_seq: str,
+    output_name: str
+) -> LatchFile:
 
-    bam_file = Path("covid_sorted.bam").resolve()
+    fold = RNA.fold(input_seq)
 
-    _samtools_sort_cmd = [
-        "samtools",
-        "sort",
-        "-o",
-        str(bam_file),
-        "-O",
-        "bam",
-        sam.local_path,
-    ]
+    out = Path(f"/root/{output_name}.txt")
 
-    subprocess.run(_samtools_sort_cmd)
-
-    return LatchFile(str(bam_file), "latch:///covid_sorted.bam")
-
+    return LatchFile(str(out), f"latch://{out}")
 
 @workflow
-def assemble_and_sort(read1: LatchFile, read2: LatchFile) -> LatchFile:
+def RNAfold(
+    input_seq: str,
+    output_name: str,
+) -> LatchFile:
     """Description...
 
-    markdown header
-    ----
+    # RNAfold
+    
+    ---
+    ## About
 
-    Write some documentation about your workflow in
-    markdown here:
-
-    > Regular markdown constructs work as expected.
-
-    # Heading
-
-    * content1
-    * content2
+    <What does RNAfold do?> 
 
     __metadata__:
-        display_name: Assemble and Sort FastQ Files
-        author:
+        display_name: Predict the folded structure of an RNA sequence
+        author: 
             name:
             email:
             github:
@@ -83,17 +48,13 @@ def assemble_and_sort(read1: LatchFile, read2: LatchFile) -> LatchFile:
 
     Args:
 
-        read1:
-          Paired-end read 1 file to be assembled.
+        input_seq:
+          RNA sequence for which structure and MFE is to be calculated
 
           __metadata__:
-            display_name: Read1
-
-        read2:
-          Paired-end read 2 file to be assembled.
-
-          __metadata__:
-            display_name: Read2
+            display_name: Input RNA sequence
     """
-    sam = assembly_task(read1=read1, read2=read2)
-    return sort_bam_task(sam=sam)
+    return RNAfold_task(
+        input_seq=input_seq,
+        output_name=output_name
+    )
