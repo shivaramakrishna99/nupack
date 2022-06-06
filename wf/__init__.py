@@ -9,6 +9,8 @@ from latch import small_task, workflow
 from latch.types import LatchFile
 from flytekit.core.with_metadata import FlyteMetadata
 
+from nupack import *  # Import NUPACK
+
 @small_task
 def nupack_task(
     input_seq: str,
@@ -22,7 +24,7 @@ def nupack_task(
     return LatchFile(str(out), f"latch://{out}")
 
 @workflow
-def nupack(
+def nupack( 
     input_seq: str,
     output_name: str,
 ) -> LatchFile:
@@ -38,9 +40,9 @@ def nupack(
     __metadata__:
         display_name: Predict the folded structure of an RNA sequence
         author: 
-            name:
-            email:
-            github:
+            name: Name
+            email: 
+            github: 
         repository:
         license:
             id: MIT
