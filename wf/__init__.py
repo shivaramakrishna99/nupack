@@ -21,17 +21,12 @@ class Material(Enum):
     rna = "rna"
     rna95 = "rna95"
 
-class Ensemble(Enum):
-    stacking = "stacking"
-    nostacking = "nostacking"
-    
 @small_task
 def model_spec(
     loop: str = "AAAA",
     structure: str = "....",
     material: Material = Material.rna,
     temperature: float = 37,
-    ensemble: Ensemble = Ensemble.stacking,
     sodium: Optional[float] = 1.0,
     magnesium: Optional[float] = 0.0,
     outputFile: Optional[str] = None
@@ -42,7 +37,7 @@ def model_spec(
     else:
         out = outputFile
 
-    nt_model = Model(material=material, ensemble=ensemble, celsius=temperature, sodium=sodium, magnesium=magnesium)
+    nt_model = Model(material=material, celsius=temperature, sodium=sodium, magnesium=magnesium)
 
     dGloop = nt_model.loop_energy(loop=loop, structure=structure)
     # stackEnergies = nt_model.stack_energies(loop=loop, structure=structure)
@@ -58,7 +53,6 @@ def nupack_loops(
     structure: str = "....",
     material: Material = Material.rna,
     temperature: float = 37.0,
-    ensemble: Ensemble = Ensemble.stacking,
     sodium: Optional[float] = 1.0,
     magnesium: Optional[float] = 0.0,
     outputFile: Optional[str] = None
@@ -95,10 +89,6 @@ def nupack_loops(
             __metadata__:
                 display_name: "Temperature (in Celsius)"
 
-        ensemble:
-            __metadata__:
-                display_name: "Ensemble Stacking Type"
-
         sodium:
             __metadata__:
                 display_name: "Sodium concentration (in nM)"
@@ -124,7 +114,6 @@ def nupack_loops(
     structure=structure,
     material=material,
     temperature=temperature,
-    ensemble=ensemble,
     sodium=sodium,
     magnesium=magnesium,
     outputFile=outputFile
