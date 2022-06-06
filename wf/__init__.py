@@ -3,30 +3,65 @@ Predict the folded structure of an RNA sequence
 """
 
 import subprocess
+from enum import Enum
+
+from enum import Enum
 from pathlib import Path
+import subprocess
+from typing import Optional
 
 from latch import small_task, workflow
 from latch.types import LatchFile
-from flytekit.core.with_metadata import FlyteMetadata
+
 
 from nupack import *  # Import NUPACK
 
+class Material(Enum):
+    dna = "dna"
+    rna = "rna"
+    rna95 = "rna95"
+
+class Ensemble(Enum):
+    stacking = "stacking"
+    nostacking = "nostacking"
+    
 @small_task
-def nupack_task(
-    input_seq: str,
-    output_name: str
+def model_spec(
+    loop: str = "AAAA",
+    structure: str = "....",
+    material: Material = Material.rna,
+    temperature: float = 37,
+    ensemble: Ensemble = Ensemble.stacking,
+    sodium: Optional[float] = 1.0,
+    magnesium: Optional[float] = 0.0,
+    outputFile: Optional[str] = None
 ) -> LatchFile:
 
-    fold = RNA.fold(input_seq)
+    if not outputFile:
+        out = Path("output.txt").resolve()
+    else:
+        out = outputFile
 
-    out = Path(f"/root/{output_name}.txt")
+    nt_model = Model(material=material, ensemble=ensemble, temperature=temperature, sodium=sodium, magnesium=magnesium)
 
-    return LatchFile(str(out), f"latch://{out}")
+    dGloop = nt_model.loop_energy(loop=loop, structure=structure)
+    # stackEnergies = nt_model.stack_energies(loop=loop, structure=structure)
+
+    with open(f"/root/{out}", "w") as f:
+        f.write(dGloop)
+
+    return LatchFile("/root/output.txt", "latch:///output.txt")
 
 @workflow
-def nupack( 
-    input_seq: str,
-    output_name: str,
+def nupack_loops(
+    loop: str = "AAAA",
+    structure: str = "....",
+    material: Material = Material.rna,
+    temperature: float = 37,
+    ensemble: Ensemble = Ensemble.stacking,
+    sodium: Optional[float] = 1.0,
+    magnesium: Optional[float] = 0.0,
+    outputFile: Optional[str] = None
 ) -> LatchFile:
     """Description...
 
@@ -48,14 +83,20 @@ def nupack(
             id: MIT
 
     Args:
-
-        input_seq:
-          RNA sequence for which structure and MFE is to be calculated
-
-          __metadata__:
-            display_name: Input RNA sequence
+    
+        material:
+            Specify nucleic acid type as DNA or RNA
+            __metadata__:
+                display_name: "Nucleic Acid Type"
+                appearance:
     """
-    return nupack_task(
-        input_seq=input_seq,
-        output_name=output_name
+    return model_spec(
+    loop=loop,
+    structure=structure,
+    material=material,
+    temperature=temperature,
+    ensemble=ensemble,
+    sodium=sodium,
+    magnesium=magnesium,
+    outputFile=outputFile
     )
