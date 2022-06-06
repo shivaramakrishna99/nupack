@@ -42,7 +42,7 @@ def model_spec(
     else:
         out = outputFile
 
-    nt_model = Model(material=material, ensemble=ensemble, temperature=temperature, sodium=sodium, magnesium=magnesium)
+    nt_model = Model(material=material, ensemble=ensemble, celsius=temperature, sodium=sodium, magnesium=magnesium)
 
     dGloop = nt_model.loop_energy(loop=loop, structure=structure)
     # stackEnergies = nt_model.stack_energies(loop=loop, structure=structure)
@@ -57,7 +57,7 @@ def nupack_loops(
     loop: str = "AAAA",
     structure: str = "....",
     material: Material = Material.rna,
-    temperature: float = 37,
+    temperature: float = 37.0,
     ensemble: Ensemble = Ensemble.stacking,
     sodium: Optional[float] = 1.0,
     magnesium: Optional[float] = 0.0,
@@ -73,22 +73,51 @@ def nupack_loops(
     <What does NUPACK do?> 
 
     __metadata__:
-        display_name: Predict the folded structure of an RNA sequence
-        author: 
-            name: Name
-            email: 
-            github: 
-        repository:
+        display_name: Create DNA/RNA models and perform analysis for loop structures
+        
+        author:
+            name: NUPACK
+            email: support@nupack.org
+            github: https://github.com/beliveau-lab/NUPACK
+        
+        repository: https://github.com/beliveau-lab/NUPACK
+        
         license:
-            id: MIT
+            id: BSD-3-Clause
 
     Args:
     
         material:
-            Specify nucleic acid type as DNA or RNA
             __metadata__:
                 display_name: "Nucleic Acid Type"
-                appearance:
+
+        temperature:
+            __metadata__:
+                display_name: "Temperature (in Celsius)"
+
+        ensemble:
+            __metadata__:
+                display_name: "Ensemble Stacking Type"
+
+        sodium:
+            __metadata__:
+                display_name: "Sodium concentration (in nM)"
+
+        magnesium:
+            __metadata__:
+                display_name: "Magnesium concentration (in nM)"
+
+        loop:
+            __metadata__:
+                display_name: "Loop sequence"
+
+        structure:
+            __metadata__:
+                display_name: "Loop structure (in dot-bracket notation)"
+
+        outputFile:
+            __metadata__:
+                display_name: "Output name"
     """
     return model_spec(
     loop=loop,
