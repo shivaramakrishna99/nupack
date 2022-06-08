@@ -29,9 +29,9 @@ class Ensemble(Enum):
 def model_spec(
     loop: str = "AAAA",
     structure: str = "....",
-    material: Material = Material.rna,
+    material: str = Material.rna,
+    ensemble: str = Ensemble.stacking,
     temperature: float = 37,
-    ensemble: Ensemble = Ensemble.stacking,
     sodium: Optional[float] = 1.0,
     magnesium: Optional[float] = 0.0,
     outputFile: Optional[str] = None
@@ -42,7 +42,7 @@ def model_spec(
     else:
         out = outputFile
 
-    nt_model = Model(material=str(material), ensemble=str(ensemble), celsius=float(temperature), sodium=float(sodium), magnesium=float(magnesium))
+    nt_model = Model(material=material, ensemble=ensemble, celsius=temperature, sodium=sodium, magnesium=magnesium)
 
     dGloop = nt_model.loop_energy(loop=str(loop), structure=str(structure))
     # stackEnergies = nt_model.stack_energies(loop=loop, structure=structure)
@@ -50,7 +50,7 @@ def model_spec(
     with open(f"/root/{out}", "w") as f:
         f.write(dGloop)
 
-    return LatchFile("/root/output.txt", "latch:///output.txt")
+    return LatchFile("output.txt", "latch:///output.txt")
 
 @workflow
 def nupack_loops(
