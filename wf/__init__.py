@@ -34,23 +34,18 @@ def model_spec(
     temperature: float = 37,
     sodium: Optional[float] = 1.0,
     magnesium: Optional[float] = 0.0,
-    outputFile: Optional[str] = None
 ) -> LatchFile:
-
-    if not outputFile:
-        out = Path("output.txt").resolve()
-    else:
-        out = outputFile
 
     nt_model = Model(material=material, ensemble=ensemble, celsius=temperature, sodium=sodium, magnesium=magnesium)
 
-    dGloop = nt_model.loop_energy(loop=str(loop), structure=str(structure))
+    dGloop = nt_model.loop_energy(loop=loop, structure=structure)
+    dGloop = str(dGloop)
     # stackEnergies = nt_model.stack_energies(loop=loop, structure=structure)
 
-    with open(f"/root/{out}", "w") as f:
+    with open("/root/output", "w") as f:
         f.write(dGloop)
 
-    return LatchFile("output.txt", "latch:///output.txt")
+    return LatchFile("/root/output", "latch:///loop_energy/output.txt")
 
 @workflow
 def nupack_loops(
@@ -61,7 +56,6 @@ def nupack_loops(
     ensemble: Ensemble = Ensemble.stacking,
     sodium: Optional[float] = 1.0,
     magnesium: Optional[float] = 0.0,
-    outputFile: Optional[str] = None
 ) -> LatchFile:
     """Description...
 
@@ -114,10 +108,6 @@ def nupack_loops(
         structure:
             __metadata__:
                 display_name: "Loop structure (in dot-bracket notation)"
-
-        outputFile:
-            __metadata__:
-                display_name: "Output name"
     """
     return model_spec(
     loop=loop,
@@ -127,5 +117,4 @@ def nupack_loops(
     ensemble=ensemble,
     sodium=sodium,
     magnesium=magnesium,
-    outputFile=outputFile
     )
