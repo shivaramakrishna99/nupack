@@ -102,9 +102,7 @@ def nupack_loop_stack(
     **Workflow Repository** - https://github.com/shivaramakrishna99/nupack/
     **Acknowledgements** - https://docs.nupack.org/#acknowledgments
     **License** - https://docs.nupack.org/#license
-    
-
-When finishing a project that has benefited from NUPACK calculations, please remember to cite the NUPACK web application and algorithms appropriately; citations are an important component in helping to secure funding for NUPACK development and maintenance. Please email us with questions, comments, feature requests, and bug reports at support@nupack.org.
+    ---
 
     __metadata__:
         display_name: NUPACK - Loop Free Energy and Stacking State Energies
