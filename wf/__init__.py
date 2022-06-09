@@ -12,62 +12,90 @@ from typing import Optional
 
 from latch import small_task, workflow
 from latch.types import LatchFile
+from natsort import as_ascii
 
 
 from nupack import *  # Import NUPACK
 
 class Material(Enum):
-    dna = "dna"
-    rna = "rna"
-    rna95 = "rna95"
+    dna = "DNA"
+    rna = "RNA"
+    rna95 = "RNA95"
 
-class Ensemble(Enum):
-    stacking = "stacking"
-    nostacking = "nostacking"
-    
+
+# Define Model() object and parameters   
+
 @small_task
-def model_spec(
+def loop_stack(
     loop: str = "AAAA",
     structure: str = "....",
     material: str = Material.rna,
-    ensemble: str = Ensemble.stacking,
     temperature: float = 37,
-    sodium: Optional[float] = 1.0,
-    magnesium: Optional[float] = 0.0,
+    sodium: float = 1.0,
+    magnesium: float = 0.0,
+    outputFile: Optional[str] = "output"
 ) -> LatchFile:
 
-    nt_model = Model(material=material, ensemble=ensemble, celsius=temperature, sodium=sodium, magnesium=magnesium)
+    nt_model = Model(material=material, celsius=temperature, sodium=sodium, magnesium=magnesium)
 
-    dGloop = nt_model.loop_energy(loop=loop, structure=structure)
-    dGloop = str(dGloop)
-    # stackEnergies = nt_model.stack_energies(loop=loop, structure=structure)
+    loopE = nt_model.loop_energy(loop=loop, structure=structure)
+    loopE = f"{loopE}"
 
-    with open("/root/output", "w") as f:
-        f.write(dGloop)
+    stackE = nt_model.stack_energies(loop=loop, structure=structure)
+    stackE = f"{stackE}"
 
-    return LatchFile("/root/output", "latch:///loop_energy/output.txt")
+    content = f"""
+        ----------OUTPUT----------
+    
+        Loop Free Energy: 
+        {loopE} kcal/mol
+    
+        Stacking State Free Energy:
+        {stackE} 
+
+        ----------INPUT SPECIFICATIONS----------
+
+        Nucleotide Sequence: {loop}
+        Dot Bracket Structure: {structure}
+
+        Energy parameter: {material}
+        Temperature: {temperature} °C
+        Na+: {sodium} M
+        Mg++: {magnesium} M
+
+        ----------END----------
+    """
+
+    with open(f"/root/{outputFile}", "w") as f:
+        f.write(content)
+
+    return LatchFile(f"/root/{outputFile}", f"latch:///{outputFile}.txt")
 
 @workflow
-def nupack_loops(
-    loop: str = "AAAA",
-    structure: str = "....",
+def nupack_loop_stack(
+    loop: str = "AU+AU+AU",
+    structure: str = "((+)(+))",
     material: Material = Material.rna,
     temperature: float = 37.0,
-    ensemble: Ensemble = Ensemble.stacking,
-    sodium: Optional[float] = 1.0,
-    magnesium: Optional[float] = 0.0,
+    sodium: float = 1.0,
+    magnesium: float = 0.0,
+    outputFile: Optional[str] = "output"
 ) -> LatchFile:
-    """Description...
+    """Analyse loop free energy and stacking state free energies for single and multiloop structures using NUPACK
 
-    # NUPACK
-    
+    # NUPACK - Loop Free Energy and Stacking State Energies
     ---
-    ## About
 
-    <What does NUPACK do?> 
+    ## About
+    ---
+    NUPACK is a growing software suite for the analysis and design of nucleic acid structures, devices, and systems serving the needs of researchers in the fields of nucleic acid nanotechnology, molecular programming, synthetic biology, and across the life sciences more broadly.
+
+    
+
+When finishing a project that has benefited from NUPACK calculations, please remember to cite the NUPACK web application and algorithms appropriately; citations are an important component in helping to secure funding for NUPACK development and maintenance. Please email us with questions, comments, feature requests, and bug reports at support@nupack.org.
 
     __metadata__:
-        display_name: Create DNA/RNA models and perform analysis for loop structures
+        display_name: NUPACK - Loop Free Energy and Stacking State Energies
         
         author:
             name: NUPACK
@@ -84,37 +112,61 @@ def nupack_loops(
         material:
             __metadata__:
                 display_name: "Nucleic Acid Type"
+                _tmp:
+                    section_title: Model Specification
+                appearance:
+                    comment: "Choose between DNA and RNA free energy parameter sets. Default is 'rna', based on Matthews et al., 1999"
 
         temperature:
             __metadata__:
-                display_name: "Temperature (in Celsius)"
-
-        ensemble:
-            __metadata__:
-                display_name: "Ensemble Stacking Type"
-
-        sodium:
-            __metadata__:
-                display_name: "Sodium concentration (in nM)"
-
-        magnesium:
-            __metadata__:
-                display_name: "Magnesium concentration (in nM)"
+                display_name: "Temperature (in degree Celsius)"
+                appearance:
+                    comment: "Temperature of system. Default is 37 °C"
 
         loop:
             __metadata__:
-                display_name: "Loop sequence"
+                display_name: "Loop Sequence(s) as nucleotides"
+                _tmp:
+                    section_title: Loop Details
+                appearance:
+                    comment: "Enter the nucleotide sequence of a loop. Separate sequences using the + symbol"
 
         structure:
             __metadata__:
                 display_name: "Loop structure (in dot-bracket notation)"
+                appearance:
+                    comment: "Enter the dot bracket notation of a loop. Separate sequences using the + symbol"
+
+        sodium:
+            __metadata__:
+                display_name: "Na+ concentration (in M)"
+                _tmp:
+                    hidden: true
+                appearance:
+                    comment: "The sum of the concentrations of (monovalent) sodium, potassium, and ammonium ions, is specified in units of molar. Default: 1.0, Range: [0.05,1.1]"
+
+        magnesium:
+            __metadata__:
+                display_name: "Mg++ (in nM). Default is 0 nM"
+                _tmp:
+                    hidden: true
+                appearance:
+                    comment: "The concentration of (divalent) magnesium ions, is specified in units of molar. Default: 0.0, Range: [0.0,0.2]"
+
+        outputFile:
+            __metadata__:
+                display_name: "Output Name"
+                _tmp:
+                    section_title: Output Specification
+                appearance:
+                    comment: "Specify the name of your output file. Default name given is 'output.txt'"
     """
-    return model_spec(
+    return loop_stack(
     loop=loop,
     structure=structure,
     material=material,
     temperature=temperature,
-    ensemble=ensemble,
     sodium=sodium,
     magnesium=magnesium,
+    outputFile=outputFile
     )
