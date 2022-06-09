@@ -2,13 +2,9 @@
 Predict the folded structure of an RNA sequence
 """
 
-import subprocess
-from enum import Enum
-
 from enum import Enum
 from pathlib import Path
 import subprocess
-from typing import Optional
 
 from latch import small_task, workflow
 from latch.types import LatchFile
@@ -25,14 +21,14 @@ class Material(Enum):
 # Define Model() object and parameters   
 
 @small_task
-def loop_stack(
+def loopStackAnalysis(
     loop: str = "AAAA",
     structure: str = "....",
     material: str = Material.rna,
     temperature: float = 37,
     sodium: float = 1.0,
     magnesium: float = 0.0,
-    outputFile: Optional[str] = "output"
+    outputFile: str = "output"
 ) -> LatchFile:
 
     nt_model = Model(material=material, celsius=temperature, sodium=sodium, magnesium=magnesium)
@@ -71,14 +67,14 @@ def loop_stack(
     return LatchFile(f"/root/{outputFile}", f"latch:///{outputFile}.txt")
 
 @workflow
-def nupack_loop_stack(
+def loopStackAnalysisNUPACK(
     loop: str = "AU+AU+AU",
     structure: str = "((+)(+))",
     material: Material = Material.rna,
     temperature: float = 37.0,
     sodium: float = 1.0,
     magnesium: float = 0.0,
-    outputFile: Optional[str] = "output"
+    outputFile: str = "output"
 ) -> LatchFile:
     """Analyse loop free energy and stacking state free energies for single and multiloop structures using NUPACK
 
@@ -99,7 +95,7 @@ def nupack_loop_stack(
 	- R. M. Dirks and N. A. Pierce. An algorithm for computing nucleic acid base-pairing probabilities including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.10296/abstract) , 25:1295-1304, 2004. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc04.pdf?type=pdf) )
 	- R. M. Dirks and N. A. Pierce. A partition function algorithm for nucleic acid secondary structure including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.20057/abstract) , 24:1664-1677, 2003. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc03.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/jcc03_supp.pdf?type=pdf) )
 
-    **Workflow Repository** - https://github.com/shivaramakrishna99/nupack/
+    **Workflow Repository** - https://github.com/shivaramakrishna99/nupack-loop-stack/
     **Acknowledgements** - https://docs.nupack.org/#acknowledgments
     **License** - https://docs.nupack.org/#license
     ---
@@ -169,9 +165,9 @@ def nupack_loop_stack(
                 _tmp:
                     section_title: Output Specification
                 appearance:
-                    comment: "Specify the name of your output file. Default name given is 'output.txt'"
+                    comment: "Specify the name of your output file."
     """
-    return loop_stack(
+    return loopStackAnalysis(
     loop=loop,
     structure=structure,
     material=material,
