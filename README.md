@@ -1,6 +1,6 @@
-# Analyse loop free energy and stacking state free energies for single and multiloop structures using NUPACK
+# Carry out NUPACK Utility functions
 
-# NUPACK - Loop Free Energy and Stacking State Energies
+# NUPACK - Utilities
 ---
 
 ## **About**
