@@ -1,6 +1,6 @@
-# Carry out NUPACK Utility functions
+# Analyse loop free energy and stacking state free energies for single and multiloop structures using NUPACK
 
-# NUPACK - Utilities
+# NUPACK - Loop Free Energy and Stacking State Energies
 ---
 
 ## **About**
@@ -17,6 +17,8 @@
 	- R. M. Dirks and N. A. Pierce. An algorithm for computing nucleic acid base-pairing probabilities including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.10296/abstract) , 25:1295-1304, 2004. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc04.pdf?type=pdf) )
 	- R. M. Dirks and N. A. Pierce. A partition function algorithm for nucleic acid secondary structure including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.20057/abstract) , 24:1664-1677, 2003. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc03.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/jcc03_supp.pdf?type=pdf) )
 
-**Latch Workflow Link** - https://github.com/shivaramakrishna99/nupack-/
+**Latch Workflow Link** - https://github.com/shivaramakrishna99/nupack-loop-stack/
+
 **Acknowledgements** - https://docs.nupack.org/#acknowledgments
+
 **License** - https://docs.nupack.org/#license

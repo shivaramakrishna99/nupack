@@ -1,5 +1,5 @@
 """
-Carry out all NUPACK Utilities functions
+Predict the folded structure of an RNA sequence
 """
 
 from enum import Enum
@@ -7,54 +7,78 @@ from pathlib import Path
 import subprocess
 
 from latch import small_task, workflow
-from latch.types import LatchFile, LatchDir
+from latch.types import LatchFile
 from natsort import as_ascii
 
 from nupack import *  # Import NUPACK
-import matplotlib.pyplot as plt
 
 class Material(Enum):
     dna = "DNA"
     rna = "RNA"
     rna95 = "RNA95"
 
+
 # Define Model() object and parameters   
 
 @small_task
-def utilities(
-    strand1: str = "ATGC",
-    strand2: str = "ATGC",
+def loopStackAnalysis(
+    loop: str = "AAAA",
     structure: str = "....",
-    material: str = Material.dna,
+    material: str = Material.rna,
     temperature: float = 37,
     sodium: float = 1.0,
     magnesium: float = 0.0,
-    outputDir: str = "output"
-) -> LatchDir:
+    outputFile: str = "output"
+) -> LatchFile:
 
     nt_model = Model(material=material, celsius=temperature, sodium=sodium, magnesium=magnesium)
 
+    loopE = nt_model.loop_energy(loop=loop, structure=structure)
+    loopE = f"{loopE}"
+
+    stackE = nt_model.stack_energies(loop=loop, structure=structure)
+    stackE = f"{stackE}"
+
     content = f"""
         ----------OUTPUT----------
-        {strand1}{strand2}{structure}
+    
+        Loop Free Energy: 
+        {loopE} kcal/mol
+    
+        Stacking State Free Energy:
+        {stackE} 
+
+        ----------INPUT SPECIFICATIONS----------
+
+        Nucleotide Sequence: {loop}
+        Dot Bracket Structure: {structure}
+
+        Energy parameter: {material}
+        Temperature: {temperature} °C
+        Na+: {sodium} M
+        Mg++: {magnesium} M
+
+        ----------END----------
     """
 
-    return LatchDir(f"/root/{outputDir}", f"latch:///{outputDir}")
+    with open(f"/root/{outputFile}", "w") as f:
+        f.write(content)
+
+    return LatchFile(f"/root/{outputFile}", f"latch:///{outputFile}.txt")
 
 @workflow
-def utilitiesNUPACK(
-    strand1: str = "ATGC",
-    strand2: str = "ATGC",
-    structure: str = "....",
-    material: str = Material.dna,
-    temperature: float = 37,
+def loopStackAnalysisNUPACK(
+    loop: str = "AU+AU+AU",
+    structure: str = "((+)(+))",
+    material: Material = Material.rna,
+    temperature: float = 37.0,
     sodium: float = 1.0,
     magnesium: float = 0.0,
-    outputDir: str = "output"
-) -> LatchDir:
-    """Carry out NUPACK Utilities functions on a complex of sequences
+    outputFile: str = "output"
+) -> LatchFile:
+    """Analyse loop free energy and stacking state free energies for single and multiloop structures using NUPACK
 
-    # NUPACK - Utility Algorithms and Calculations
+    # NUPACK - Loop Free Energy and Stacking State Energies
     ---
 
     ## **About**
@@ -65,26 +89,19 @@ def utilitiesNUPACK(
     ---
     ### NUPACK Analysis Algorithms
     **Complex analysis and test tube analysis**
-	- M.E. Fornace, N.J. Porubsky, and N.A. Pierce (2020). A unified dynamic programming framework for the analysis of interacting nucleic acid strands: enhanced models, scalability, and speed.  [ACS Synth Biol](https://pubs.acs.org/doi/abs/10.1021/acssynbio.9b00523) , 9:2665-2678, 2020. ( [pdf](http://www.nupack.org/downloads/serve_public_file/fornace20.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/fornace20_supp.pdf?type=pdf) )
-	
-    - R. M. Dirks, J. S. Bois, J. M. Schaeffer, E. Winfree, and N. A. Pierce. Thermodynamic analysis of interacting nucleic acid strands.  [SIAM Rev](http://epubs.siam.org/doi/abs/10.1137/060651100) , 49:65-88, 2007. ( [pdf](http://www.nupack.org/downloads/serve_public_file/sirev07.pdf?type=pdf) )
+	    - M.E. Fornace, N.J. Porubsky, and N.A. Pierce (2020). A unified dynamic programming framework for the analysis of interacting nucleic acid strands: enhanced models, scalability, and speed.  [ACS Synth Biol](https://pubs.acs.org/doi/abs/10.1021/acssynbio.9b00523) , 9:2665-2678, 2020. ( [pdf](http://www.nupack.org/downloads/serve_public_file/fornace20.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/fornace20_supp.pdf?type=pdf) )
+	    - R. M. Dirks, J. S. Bois, J. M. Schaeffer, E. Winfree, and N. A. Pierce. Thermodynamic analysis of interacting nucleic acid strands.  [SIAM Rev](http://epubs.siam.org/doi/abs/10.1137/060651100) , 49:65-88, 2007. ( [pdf](http://www.nupack.org/downloads/serve_public_file/sirev07.pdf?type=pdf) )
     **Pseudoknot analysis**
-	
-    - R. M. Dirks and N. A. Pierce. An algorithm for computing nucleic acid base-pairing probabilities including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.10296/abstract) , 25:1295-1304, 2004. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc04.pdf?type=pdf) )
-	
-    - R. M. Dirks and N. A. Pierce. A partition function algorithm for nucleic acid secondary structure including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.20057/abstract) , 24:1664-1677, 2003. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc03.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/jcc03_supp.pdf?type=pdf) )
+	    - R. M. Dirks and N. A. Pierce. An algorithm for computing nucleic acid base-pairing probabilities including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.10296/abstract) , 25:1295-1304, 2004. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc04.pdf?type=pdf) )
+	    - R. M. Dirks and N. A. Pierce. A partition function algorithm for nucleic acid secondary structure including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.20057/abstract) , 24:1664-1677, 2003. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc03.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/jcc03_supp.pdf?type=pdf) )
 
-    1. **Workflow Repository** - https://github.com/shivaramakrishna99/nupack-loop-stack/
-    
-    2. **Acknowledgements** - https://docs.nupack.org/#acknowledgments
-
-    3. **License** - https://docs.nupack.org/#license
-    
-    4. **Citation** - https://docs.nupack.org/#citation
+    **Workflow Repository** - https://github.com/shivaramakrishna99/nupack-loop-stack/
+    **Acknowledgements** - https://docs.nupack.org/#acknowledgments
+    **License** - https://docs.nupack.org/#license
     ---
 
     __metadata__:
-        display_name: NUPACK - Utility Functions
+        display_name: NUPACK - Loop Free Energy and Stacking State Energies
         
         author:
             name: The NUPACK Team
@@ -112,27 +129,19 @@ def utilitiesNUPACK(
                 appearance:
                     comment: "Temperature of system. Default is 37 °C"
 
-        strand1:
+        loop:
             __metadata__:
-                display_name: "Strand 1 (as nucleotides)"
+                display_name: "Loop Sequence(s) as nucleotides"
                 _tmp:
-                    section_title: Strand Details
+                    section_title: Loop Details
                 appearance:
-                    comment: "Enter the nucleotide sequence of the first strand"
-
-        strand2:
-            __metadata__:
-                display_name: "Strand 2 (as nucleotides)"
-                _tmp:
-                    section_title: Strand Details
-                appearance:
-                    comment: "Enter the nucleotide sequence of the second strand"
+                    comment: "Enter the nucleotide sequence of a loop. Separate sequences using the + symbol"
 
         structure:
             __metadata__:
-                display_name: "Structure of Complex (in regular/extended dot-bracket notation)"
+                display_name: "Loop structure (in dot-bracket notation)"
                 appearance:
-                    comment: "Enter the dot bracket notation of the intended structure"
+                    comment: "Enter the dot bracket notation of a loop. Separate sequences using the + symbol"
 
         sodium:
             __metadata__:
@@ -150,21 +159,20 @@ def utilitiesNUPACK(
                 appearance:
                     comment: "The concentration of (divalent) magnesium ions, is specified in units of molar. Default: 0.0, Range: [0.0,0.2]"
 
-        outputDir:
+        outputFile:
             __metadata__:
                 display_name: "Output Name"
                 _tmp:
                     section_title: Output Specification
                 appearance:
-                    comment: "Specify the name of your output directory."
+                    comment: "Specify the name of your output file."
     """
-    return utilities(
-    strand1=strand1,
-    strand2=strand2,
+    return loopStackAnalysis(
+    loop=loop,
     structure=structure,
     material=material,
     temperature=temperature,
     sodium=sodium,
     magnesium=magnesium,
-    outputDir=outputDir
+    outputFile=outputFile
     )
