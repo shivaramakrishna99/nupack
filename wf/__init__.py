@@ -70,7 +70,7 @@ def loopStackAnalysis(
 def loopStackAnalysisNUPACK(
     loop: str = "AU+AU+AU",
     structure: str = "((+)(+))",
-    material: str = Material.rna,
+    material: Material = Material.rna,
     temperature: float = 37.0,
     sodium: float = 1.0,
     magnesium: float = 0.0,
