@@ -1,10 +1,8 @@
 """
-Predict the folded structure of an RNA sequence
+Specify a NUPACK model for a DNA/RNA loop and calculate two states of energy  
 """
 
 from enum import Enum
-from pathlib import Path
-import subprocess
 
 from latch import small_task, workflow
 from latch.types import LatchFile
@@ -88,6 +86,7 @@ def loopStackAnalysisNUPACK(
     ## **Citations**
     ---
     ### NUPACK Analysis Algorithms
+    
     **Complex analysis and test tube analysis**
 	
     - M.E. Fornace, N.J. Porubsky, and N.A. Pierce (2020). A unified dynamic programming framework for the analysis of interacting nucleic acid strands: enhanced models, scalability, and speed.  [ACS Synth Biol](https://pubs.acs.org/doi/abs/10.1021/acssynbio.9b00523) , 9:2665-2678, 2020. ( [pdf](http://www.nupack.org/downloads/serve_public_file/fornace20.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/fornace20_supp.pdf?type=pdf) )
