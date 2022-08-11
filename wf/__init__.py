@@ -77,16 +77,28 @@ def loopStackAnalysisNUPACK(
     """Analyse loop free energy and stacking state free energies for single and multiloop structures using NUPACK
 
     # NUPACK - Loop Free Energy and Stacking State Energies
-    ---
 
     ## **About**
     ---
+
     [NUPACK](https://docs.nupack.org/#about) is a growing software suite for the analysis and design of nucleic acid structures, devices, and systems serving the needs of researchers in the fields of nucleic acid nanotechnology, molecular programming, synthetic biology, and across the life sciences more broadly.
+
+    ## **How to use**
+    ---
+
+    1. Specify the model by choosing the nucleic acid type. This parameter is based on parameter sets obtained from different research papers. Check them out [here](https://docs.nupack.org/model/#material)
+    
+    2. Specify the details of the loop's sequence and structural details.
+
+    3. Specify any other changes in the construction of the Model() object using the hidden parameters such as temperature and ion concentrations. 
+
+    4. Run the workflow!
 
     ## **Citations**
     ---
+
     ### NUPACK Analysis Algorithms
-    
+
     **Complex analysis and test tube analysis**
 	
     - M.E. Fornace, N.J. Porubsky, and N.A. Pierce (2020). A unified dynamic programming framework for the analysis of interacting nucleic acid strands: enhanced models, scalability, and speed.  [ACS Synth Biol](https://pubs.acs.org/doi/abs/10.1021/acssynbio.9b00523) , 9:2665-2678, 2020. ( [pdf](http://www.nupack.org/downloads/serve_public_file/fornace20.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/fornace20_supp.pdf?type=pdf) )
@@ -102,17 +114,17 @@ def loopStackAnalysisNUPACK(
     **Workflow Repository** - (https://github.com/shivaramakrishna99/nupack-loop-stack/)
     
     **Acknowledgements** - (https://docs.nupack.org/#acknowledgments)
-    
-    **License** - (https://docs.nupack.org/#license)
+
+    *Authored by Shivaramakrishna Srinivasan. Feel free to reach out to me at shivaramakrishna.srinivasan@gmail.com*
     ---
 
     __metadata__:
         display_name: NUPACK - Loop Free Energy and Stacking State Energies
         
         author:
-            name: The NUPACK Team
-            email: support@nupack.org
-            github: https://github.com/beliveau-lab/NUPACK
+            name: Shivaramakrishna Srinivasan
+            email: shivaramakrishna.srinivasan@gmail.com
+            github: https://github.com/shivaramakrishna99
         
         repository: https://github.com/beliveau-lab/NUPACK
         
@@ -120,7 +132,6 @@ def loopStackAnalysisNUPACK(
             id: BSD-3-Clause
 
     Args:
-    
         material:
             __metadata__:
                 display_name: "Nucleic Acid Type"
@@ -128,27 +139,26 @@ def loopStackAnalysisNUPACK(
                     section_title: Model Specification
                 appearance:
                     comment: "Choose between DNA and RNA free energy parameter sets. Default is 'rna', based on Matthews et al., 1999"
-
-        temperature:
-            __metadata__:
-                display_name: "Temperature (in degree Celsius)"
-                appearance:
-                    comment: "Temperature of system. Default is 37 °C"
-
         loop:
             __metadata__:
                 display_name: "Loop Sequence(s) as nucleotides"
                 _tmp:
                     section_title: Loop Details
                 appearance:
-                    comment: "Enter the nucleotide sequence of a loop. Separate sequences using the + symbol"
-
+                    comment: "Enter the nucleotide sequence of a loop. Separate two or more sequences using the + symbol"
         structure:
             __metadata__:
                 display_name: "Loop structure (in dot-bracket notation)"
                 appearance:
                     comment: "Enter the dot bracket notation of a loop. Separate sequences using the + symbol"
-
+        temperature:
+            __metadata__:
+                display_name: "Temperature (in degree Celsius)"
+                _tmp:
+                    hidden: true
+                    section_title: Other Model Details
+                appearance:
+                    comment: "Temperature of system. Default is 37 °C"
         sodium:
             __metadata__:
                 display_name: "Na+ concentration (in M)"
@@ -156,7 +166,6 @@ def loopStackAnalysisNUPACK(
                     hidden: true
                 appearance:
                     comment: "The sum of the concentrations of (monovalent) sodium, potassium, and ammonium ions, is specified in units of molar. Default: 1.0, Range: [0.05,1.1]"
-
         magnesium:
             __metadata__:
                 display_name: "Mg++ (in nM). Default is 0 nM"
@@ -164,7 +173,6 @@ def loopStackAnalysisNUPACK(
                     hidden: true
                 appearance:
                     comment: "The concentration of (divalent) magnesium ions, is specified in units of molar. Default: 0.0, Range: [0.0,0.2]"
-
         outputFile:
             __metadata__:
                 display_name: "Output Name"
