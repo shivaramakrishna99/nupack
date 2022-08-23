@@ -5,7 +5,7 @@ Specify a NUPACK model for a DNA/RNA loop and calculate two states of energy
 from enum import Enum
 
 from latch import small_task, workflow
-from latch.types import LatchFile
+from latch.types import LatchFile, LatchMetadata, LatchAuthor, LatchParameter, LatchAppearanceType, LatchRule
 from natsort import as_ascii
 
 from nupack import *  # Import NUPACK
@@ -26,7 +26,7 @@ def loopStackAnalysis(
     temperature: float = 37,
     sodium: float = 1.0,
     magnesium: float = 0.0,
-    outputFile: str = "output"
+    out: str = "output"
 ) -> LatchFile:
 
     nt_model = Model(material=material, celsius=temperature, sodium=sodium, magnesium=magnesium)
@@ -64,7 +64,57 @@ def loopStackAnalysis(
 
     return LatchFile(f"/root/{outputFile}", f"latch:///{outputFile}.txt")
 
-@workflow
+metadata = LatchMetadata(
+    display_name="NUPACK - Loop and Stack Energies",
+    documentation="https://docs.nupack.org/model/#compute-loop-free-energy",
+    author=LatchAuthor(
+        name="Shivaramakrishna Srinivasan",
+        email="shivaramakrishna.srinivasan@gmail.com",
+        github="https://github.com/shivaramakrishna99",
+    ),
+    repository="https://github.com/shivaramakrishna99/nupack-loop-stack",
+    license="BSD-3-Clause",
+)
+
+metadata.parameters["loop"] = LatchParameter(
+    display_name="Loop Sequence(s)",
+    description="Enter the nucleotide sequence of a loop. Separate two or more sequences using the '+' symbol",
+    section_title= 'Loop Details',
+)
+metadata.parameters["structure"] = LatchParameter(
+    display_name="Loop Structure(s)",
+    description="Enter the dot bracket notation of a loop. Separate sequences using the + symbol",
+)
+
+metadata.parameters["material"] = LatchParameter(
+    display_name="Nucleic Acid Type",
+    description="Choose between DNA and RNA free energy parameter sets. Default is 'rna', based on Matthews et al., 1999",
+    section_title="Model Specification",
+    hidden=True,
+)
+
+metadata.parameters["temperature"] = LatchParameter(
+    display_name="Temperature (in °C)",
+    description="Temperature of system. Default: 37.0",
+    hidden=True,
+)
+metadata.parameters["sodium"] = LatchParameter(
+    display_name="Na+ (in M)",
+    description="The total concentration of (monovalent) sodium, potassium, and ammonium ions, specified as molarity. Default: 1.0, Range: [0.05,1.1]",
+    hidden=True,
+    section_title="Additional Model Specification"
+)
+metadata.parameters["magnesium"] = LatchParameter(
+    display_name="Mg++ (in nM)",
+    description="The total concentration of (divalent) magnesium ions, specified as molarity. Default: 0.0, Range: [0.0,0.2]",
+    hidden=True
+)
+metadata.parameters["out"] = LatchParameter(
+    display_name="Output File Name",
+    section_title="Output"
+)
+
+@workflow(metadata)
 def loopStackAnalysisNUPACK(
     loop: str = "AU+AU+AU",
     structure: str = "((+)(+))",
@@ -72,9 +122,9 @@ def loopStackAnalysisNUPACK(
     temperature: float = 37.0,
     sodium: float = 1.0,
     magnesium: float = 0.0,
-    outputFile: str = "output"
+    out: str = "output"
 ) -> LatchFile:
-    """Analyse loop free energy and stacking state free energies for single and multiloop structures using NUPACK
+    """Analyse loop free energy and stacking state free energies, for single and multiloop structures using NUPACK
 
     # NUPACK - Loop Free Energy and Stacking State Energies
 
@@ -117,69 +167,6 @@ def loopStackAnalysisNUPACK(
 
     *Authored by Shivaramakrishna Srinivasan. Feel free to reach out to me at shivaramakrishna.srinivasan@gmail.com*
     ---
-
-    __metadata__:
-        display_name: NUPACK - Loop Free Energy and Stacking State Energies
-        
-        author:
-            name: Shivaramakrishna Srinivasan
-            email: shivaramakrishna.srinivasan@gmail.com
-            github: https://github.com/shivaramakrishna99
-        
-        repository: https://github.com/beliveau-lab/NUPACK
-        
-        license:
-            id: BSD-3-Clause
-
-    Args:
-        material:
-            __metadata__:
-                display_name: "Nucleic Acid Type"
-                _tmp:
-                    section_title: Model Specification
-                appearance:
-                    comment: "Choose between DNA and RNA free energy parameter sets. Default is 'rna', based on Matthews et al., 1999"
-        loop:
-            __metadata__:
-                display_name: "Loop Sequence(s) as nucleotides"
-                _tmp:
-                    section_title: Loop Details
-                appearance:
-                    comment: "Enter the nucleotide sequence of a loop. Separate two or more sequences using the + symbol"
-        structure:
-            __metadata__:
-                display_name: "Loop structure (in dot-bracket notation)"
-                appearance:
-                    comment: "Enter the dot bracket notation of a loop. Separate sequences using the + symbol"
-        temperature:
-            __metadata__:
-                display_name: "Temperature (in degree Celsius)"
-                _tmp:
-                    hidden: true
-                    section_title: Other Model Details
-                appearance:
-                    comment: "Temperature of system. Default is 37 °C"
-        sodium:
-            __metadata__:
-                display_name: "Na+ concentration (in M)"
-                _tmp:
-                    hidden: true
-                appearance:
-                    comment: "The sum of the concentrations of (monovalent) sodium, potassium, and ammonium ions, is specified in units of molar. Default: 1.0, Range: [0.05,1.1]"
-        magnesium:
-            __metadata__:
-                display_name: "Mg++ (in nM). Default is 0 nM"
-                _tmp:
-                    hidden: true
-                appearance:
-                    comment: "The concentration of (divalent) magnesium ions, is specified in units of molar. Default: 0.0, Range: [0.0,0.2]"
-        outputFile:
-            __metadata__:
-                display_name: "Output Name"
-                _tmp:
-                    section_title: Output Specification
-                appearance:
-                    comment: "Specify the name of your output file."
     """
     return loopStackAnalysis(
     loop=loop,
@@ -188,5 +175,5 @@ def loopStackAnalysisNUPACK(
     temperature=temperature,
     sodium=sodium,
     magnesium=magnesium,
-    outputFile=outputFile
+    out=out
     )
